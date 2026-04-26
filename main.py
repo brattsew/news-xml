@@ -199,11 +199,22 @@ def get_title(soup):
     return get_meta(soup, "og:title")
 
 def get_text(soup):
+    text_parts = []
+    seen_texts = set()
+    special_blocks = soup.find_all("div", class_="article__text")
+    special_blocks += soup.find_all("div", class_="article__block")
+    for block in special_blocks:
+        text = block.get_text(" ", strip=True)
+        if len(text) > 20 and text not in seen_texts:
+            seen_texts.add(text)
+            text_parts.append(text)
+    if text_parts:
+        return "\n".join(text_parts)
+
     possible_blocks = [
-        soup.find(attrs={"itemprop": "articleBody"}),
         soup.find("div", class_="topic-body__content"),
-        soup.find("div", class_="article__text"),
         soup.find("div", class_="article__content"),
+        soup.find(attrs={"itemprop": "articleBody"}),
         soup.find("article"),
     ]
     article_block = None
@@ -221,7 +232,6 @@ def get_text(soup):
             return text
     if not paragraphs:
         paragraphs = soup.find_all("p")
-    text_parts = []
     for paragraph in paragraphs:
         text = paragraph.get_text(" ", strip=True)
         if len(text) <= 20:
