@@ -19,9 +19,6 @@ dist/
 .idea/
 .vscode/
 
-# Generated dataset
-news.xml
-
 # Local environment files
 .env
 .env.*

@@ -362,6 +362,6 @@ def main():
     print("Источник:", source)
     print("Общее количество сохраненных новостей:", len(news_list))
     print("Итоговый XML-файл:", OUTPUT_FILE)
-    
+
 if __name__ == "__main__":
     main()
