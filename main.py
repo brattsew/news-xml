@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 OUTPUT_FILE = "news.xml"
 SAVE_EVERY = 100
 DELAY = 0.05
+RETRIES = 3
 LENTA_SITE = "https://lenta.ru"
 START_YEAR = 2026
 START_MONTH = 4
@@ -54,16 +55,18 @@ def previous_day(year, month, day):
     return year, month, DAYS_IN_MONTH[month]
 
 def get_page(url):
-    try:
-        response = session.get(url, timeout=15)
-        time.sleep(DELAY)
-        if response.status_code != 200:
+    for attempt in range(1, RETRIES + 1):
+        try:
+            response = session.get(url, timeout=15)
+            time.sleep(DELAY)
+            if response.status_code == 200:
+                return response.text
             print("Страница не открылась:", url, "код:", response.status_code)
-            return None
-        return response.text
-    except Exception as error:
-        print("Ошибка при открытии страницы:", url, error)
-        return None
+        except Exception as error:
+            print("Ошибка при открытии страницы:", url, error)
+        if attempt < RETRIES:
+            time.sleep(DELAY * attempt)
+    return None
     
 def get_path(url):
     if "://" not in url:
